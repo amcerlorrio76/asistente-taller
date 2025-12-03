@@ -1,40 +1,21 @@
-import express from 'express';
-import cors from 'cors';
-import fs from 'fs';
+const express = require("express");
+const path = require("path");
 
 const app = express();
-
-// Render uses PORT provided by environment
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
+// 1) Servir la carpeta "public" como estática
+app.use(express.static(path.join(__dirname, "public")));
 
-// Storage file
-const STORAGE_FILE = './conversaciones.json';
+// 2) (Opcional) Ruta de prueba para ver que el servidor responde
+app.get("/health", (req, res) => {
+  res.send("OK");
+});
 
-// Load conversations
-function loadConversations() {
-  if (!fs.existsSync(STORAGE_FILE)) return [];
-  try {
-    const raw = fs.readFileSync(STORAGE_FILE, 'utf8');
-    const data = JSON.parse(raw);
-    return Array.isArray(data) ? data : [];
-  } catch {
-    return [];
-  }
-}
-
-// Save conversations
-function saveConversations(convs) {
-  fs.writeFileSync(STORAGE_FILE, JSON.stringify(convs, null, 2), 'utf8');
-}
-
-// Endpoint for Make Webhook
-app.post('/chat-event', (req, res) => {
-  const data = req.body || {};
-
-  const channel          = data.channel || 'unknown';
+// 3) Arrancar servidor
+app.listen(PORT, () => {
+  console.log("Servidor iniciado en puerto " + PORT);
+});  const channel          = data.channel || 'unknown';
   const chatId           = data.chat_id || 'unknown';
   const customerMessage  = data.customer_message || '';
   const assistantMessage = data.assistant_message || '';
