@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Panel de Conversaciones</title>
+</head>
+<body>
+  <h1>Panel de Conversaciones del Taller</h1>
+  <pre id="data">Cargando...</pre>
+
+  <script>
+    async function cargarConversaciones() {
+      const res = await fetch('/conversations');
+      const data = await res.json();
+      document.getElementById('data').textContent = JSON.stringify(data, null, 2);
+    }
+    cargarConversaciones();
+    setInterval(cargarConversaciones, 4000);
+  </script>
+</body>
+</html>
