@@ -40,15 +40,19 @@ app.post("/chat-event", (req, res) => {
     const data = req.body || {};
 
     const record = {
-      session_id:
-        data.session_id ||
-        (data.chat_id ? `telegram:${data.chat_id}` : "unknown"),
-      channel: data.origen || data.channel || "telegram",
-      chat_id: data.chat_id || "",
-      customer_message: data.customer_message || "",
-      assistant_message: data.assistant_message || "",
-      timestamp: data.timestamp || new Date().toISOString(),
-    };
+  session_id:
+    data.session_id ||
+    (data.chat_id ? `telegram:${data.chat_id}` : "unknown"),
+  channel: data.origen || data.channel || "telegram",
+  chat_id: data.chat_id || "",
+  customer_message: data.customer_message || "",
+  assistant_message: data.assistant_message || "",
+  nombre: data.nombre || "",
+  telefono: data.telefono || "",
+  matricula: data.matricula || "",
+  servicio: data.servicio || "",
+  timestamp: data.timestamp || new Date().toISOString(),
+};
 
     const conversations = loadConversations();
     conversations.push(record);
