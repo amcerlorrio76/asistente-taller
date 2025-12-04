@@ -1,21 +1,130 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Taller AlexConsultor IA</title>
+  <title>Panel Asistente - Taller</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; height: 100vh; display: flex; }
+    .sidebar {
+      width: 300px; background: #1A2E44; color: #fff; padding: 15px;
+      display: flex; flex-direction: column;
+    }
+    .sidebar h2 {
+      margin-top: 0; text-align: center; border-bottom: 1px solid #fff4;
+      padding-bottom: 10px; font-size: 20px;
+    }
+    .session-list {
+      flex: 1; overflow-y: auto; margin-top: 10px;
+    }
+    .session-item {
+      padding: 10px; border-bottom: 1px solid #fff2; cursor: pointer;
+    }
+    .session-item:hover {
+      background: #2A3F56;
+    }
+    .session-item.active { background: #3B82F6; }
+    .main {
+      flex: 1; background: #f5f5f5; display: flex; flex-direction: column;
+    }
+    .chat-header {
+      background: #fff; border-bottom: 1px solid #ddd; padding: 15px;
+      font-weight: bold; font-size: 18px;
+    }
+    .chat {
+      flex: 1; padding: 20px; overflow-y: auto;
+    }
+    .msg {
+      margin-bottom: 12px; max-width: 70%; padding: 10px 14px; border-radius: 10px;
+      font-size: 14px; line-height: 1.4;
+    }
+    .customer { background: #fff; border: 1px solid #ccc; }
+    .assistant { background: #3B82F6; color: #fff; margin-left: auto; }
+    .timestamp { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+  </style>
 </head>
 <body>
-  <h1>Chat Taller AlexConsultor IA</h1>
-  <pre id="data">Cargando...</pre>
 
-  <script>
-    async function cargarConversaciones() {
-      const res = await fetch('/conversations');
-      const data = await res.json();
-      document.getElementById('data').textContent = JSON.stringify(data, null, 2);
-    }
-    cargarConversaciones();
-    setInterval(cargarConversaciones, 4000);
-  </script>
+<div class="sidebar">
+  <h2>Conversaciones</h2>
+  <div id="session-list" class="session-list"></div>
+</div>
+
+<div class="main">
+  <div id="chat-header" class="chat-header">Selecciona una conversación</div>
+  <div id="chat" class="chat"></div>
+</div>
+
+<script>
+  let conversations = [];
+  let sessions = [];
+  let selected = null;
+
+  async function loadData() {
+    const res = await fetch("/conversations");
+    conversations = await res.json();
+    buildSessions();
+  }
+
+  function buildSessions() {
+    const list = document.getElementById("session-list");
+    list.innerHTML = "";
+
+    const grouped = {};
+    conversations.forEach(c => {
+      if (!grouped[c.session_id]) grouped[c.session_id] = [];
+      grouped[c.session_id].push(c);
+    });
+
+    sessions = Object.keys(grouped);
+
+    sessions.forEach(id => {
+      const div = document.createElement("div");
+      div.className = "session-item" + (selected === id ? " active" : "");
+      div.textContent = id;
+      div.onclick = () => {
+        selected = id;
+        buildSessions();
+        showChat();
+      };
+      list.appendChild(div);
+    });
+  }
+
+  function showChat() {
+    if (!selected) return;
+
+    const chat = document.getElementById("chat");
+    const header = document.getElementById("chat-header");
+    chat.innerHTML = "";
+    header.textContent = "Conversación: " + selected;
+
+    const msgs = conversations.filter(c => c.session_id === selected);
+
+    msgs.forEach(m => {
+      if (m.customer_message) {
+        chat.innerHTML += `
+          <div class="msg customer">
+            ${m.customer_message}
+            <div class="timestamp">${m.timestamp}</div>
+          </div>
+        `;
+      }
+      if (m.assistant_message) {
+        chat.innerHTML += `
+          <div class="msg assistant">
+            ${m.assistant_message}
+            <div class="timestamp">${m.timestamp}</div>
+          </div>
+        `;
+      }
+    });
+
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  loadData();
+  setInterval(loadData, 3000);
+</script>
+
 </body>
 </html>
