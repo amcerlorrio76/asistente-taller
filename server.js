@@ -5,10 +5,10 @@ const fs = require("fs");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware para parsear JSON del cuerpo
+// 👉 MUY IMPORTANTE: esto permite leer JSON del cuerpo
 app.use(express.json());
 
-// ====== CONVERSACIONES (para el panel) ======
+// ====== CONVERSACIONES para el panel ======
 
 const STORAGE_FILE = path.join(__dirname, "conversaciones.json");
 
@@ -32,13 +32,17 @@ function saveConversations(data) {
   }
 }
 
-// Recibir eventos desde Make
+// 👉 Endpoint que llama Make
 app.post("/chat-event", (req, res) => {
   try {
+    console.log("BODY RECIBIDO EN /chat-event:", req.body);
+
     const data = req.body || {};
 
     const record = {
-      session_id: data.session_id || (data.chat_id ? `telegram:${data.chat_id}` : "unknown"),
+      session_id:
+        data.session_id ||
+        (data.chat_id ? `telegram:${data.chat_id}` : "unknown"),
       channel: data.origen || data.channel || "telegram",
       chat_id: data.chat_id || "",
       customer_message: data.customer_message || "",
@@ -57,12 +61,12 @@ app.post("/chat-event", (req, res) => {
   }
 });
 
-// Devolver conversaciones al panel web
+// 👉 Endpoint que usa el panel para pintar la lista
 app.get("/conversations", (req, res) => {
   res.json(loadConversations());
 });
 
-// ====== PANEL WEB ======
+// ====== PANEL WEB estático ======
 
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -70,7 +74,7 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-// Endpoint de salud
+// Salud
 app.get("/health", (req, res) => {
   res.send("OK");
 });
