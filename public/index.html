@@ -89,29 +89,37 @@
   }
 
   function buildSessions() {
-    const list = document.getElementById("session-list");
-    list.innerHTML = "";
+  const list = document.getElementById("session-list");
+  list.innerHTML = "";
 
-    const grouped = {};
-    conversations.forEach(c => {
-      if (!grouped[c.session_id]) grouped[c.session_id] = [];
-      grouped[c.session_id].push(c);
-    });
+  const grouped = {};
+  conversations.forEach(c => {
+    if (!grouped[c.session_id]) grouped[c.session_id] = [];
+    grouped[c.session_id].push(c);
+  });
 
-    sessions = Object.keys(grouped);
+  sessions = Object.keys(grouped);
 
-    sessions.forEach(id => {
-      const div = document.createElement("div");
-      div.className = "session-item" + (selected === id ? " active" : "");
-      div.textContent = id;
-      div.onclick = () => {
-        selected = id;
-        buildSessions();
-        showChat();
-      };
-      list.appendChild(div);
-    });
-  }
+  sessions.forEach(id => {
+    const conv = grouped[id];
+
+    // Buscar los datos del cliente
+    const nombre = conv.find(m => m.nombre)?.nombre || "Sin nombre";
+    const matricula = conv.find(m => m.matricula)?.matricula || "Sin matrícula";
+
+    const label = `${nombre} - ${matricula}`;
+
+    const div = document.createElement("div");
+    div.className = "session-item" + (selected === id ? " active" : "");
+    div.textContent = label;
+    div.onclick = () => {
+      selected = id;
+      buildSessions();
+      showChat();
+    };
+    list.appendChild(div);
+  });
+}
 
   function showChat() {
     if (!selected) return;
