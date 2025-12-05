@@ -40,12 +40,22 @@
     .customer { background: #fff; border: 1px solid #ccc; }
     .assistant { background: #3B82F6; color: #fff; margin-left: auto; }
     .timestamp { font-size: 11px; opacity: 0.7; margin-top: 4px; }
+    #customer-info {
+      background: #fff;
+      border-bottom: 1px solid #ddd;
+      padding: 15px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #customer-info h3 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 16px;
+    }
   </style>
 </head>
 <body>
-<div id="customer-info" style="padding: 10px 15px; border-bottom: 1px solid #ddd;">
-  <!-- Aquí pondremos los datos del cliente por JS -->
-</div>
+
 <div class="sidebar">
   <h2>Conversaciones</h2>
   <div id="session-list" class="session-list"></div>
@@ -53,6 +63,16 @@
 
 <div class="main">
   <div id="chat-header" class="chat-header">Selecciona una conversación</div>
+
+  <!-- 🟦 DATOS DEL CLIENTE -->
+  <div id="customer-info">
+    <h3>Datos del cliente</h3>
+    <div>Nombre: <span id="info-nombre">-</span></div>
+    <div>Teléfono: <span id="info-telefono">-</span></div>
+    <div>Matrícula: <span id="info-matricula">-</span></div>
+    <div>Servicio: <span id="info-servicio">-</span></div>
+  </div>
+
   <div id="chat" class="chat"></div>
 </div>
 
@@ -65,6 +85,7 @@
     const res = await fetch("/conversations");
     conversations = await res.json();
     buildSessions();
+    if (selected) showChat();
   }
 
   function buildSessions() {
@@ -102,6 +123,15 @@
 
     const msgs = conversations.filter(c => c.session_id === selected);
 
+    // 🟦 Mostrar datos del cliente
+    const info = msgs.find(m => m.nombre || m.telefono || m.matricula || m.servicio) || {};
+
+    document.getElementById("info-nombre").textContent = info.nombre || "-";
+    document.getElementById("info-telefono").textContent = info.telefono || "-";
+    document.getElementById("info-matricula").textContent = info.matricula || "-";
+    document.getElementById("info-servicio").textContent = info.servicio || "-";
+
+    // 🟦 Pintar mensajes del chat
     msgs.forEach(m => {
       if (m.customer_message) {
         chat.innerHTML += `
